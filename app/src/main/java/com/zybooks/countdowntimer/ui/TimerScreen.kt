@@ -27,6 +27,13 @@ import java.text.DecimalFormat
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun TimerScreen(
@@ -40,8 +47,11 @@ fun TimerScreen(
             .size(240.dp),
          contentAlignment = Alignment.Center
       ) {
-         // TODO: Add AnimatedTimeIndicator here
-
+         if (timerViewModel.isRunning) {
+            AnimatedTimeIndicator(
+               timeDuration = timerViewModel.totalMillis.toInt()
+            )
+         }
          Text(
             text = timerText(timerViewModel.remainingMillis),
             fontSize = 40.sp,
@@ -164,4 +174,30 @@ fun NumberPickerWrapper(
          }
       }
    )
+}
+
+@Composable
+fun AnimatedTimeIndicator(
+   timeDuration: Int = 1000
+) {
+   var progress by remember { mutableFloatStateOf(1f) }
+   val progressAnimation by animateFloatAsState(
+      targetValue = progress,
+      animationSpec = tween(
+         durationMillis = timeDuration,
+         easing = LinearEasing
+      ),
+      label = "Progress indicator",
+   )
+
+   CircularProgressIndicator(
+      progress = progressAnimation,
+      modifier = Modifier.size(240.dp),
+      color = Color.Magenta,
+      strokeWidth = 20.dp,
+   )
+
+   LaunchedEffect(Unit) {
+      progress = 0f
+   }
 }
